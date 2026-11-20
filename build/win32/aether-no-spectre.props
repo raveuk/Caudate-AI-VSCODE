@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup Condition="'$(SpectreMitigation)' != '' and '$(SpectreMitigation)' != 'false' and !Exists('$(VCToolsInstallDir)lib\spectre')">
+    <SpectreMitigation>false</SpectreMitigation>
+  </PropertyGroup>
+</Project>

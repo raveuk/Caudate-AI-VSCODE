@@ -1,0 +1,143 @@
+{
+	"name": "aether-ai",
+	"displayName": "Caudate AI",
+	"description": "Full Cursor & Antigravity-style AI Agent, Composer, Next Edit Prediction (NES), Inline Edit (Ctrl+K), Terminal Ctrl+K, MCP Client, Browser Agent, Parallel Git Worktrees, Vector Codebase Index, AI Git Suite, and Tab Autocomplete for Caudate IDE.",
+	"version": "2.0.0",
+	"publisher": "vscode",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/raveuk/Caudate-AI-VSCODE.git"
+	},
+	"bugs": {
+		"url": "https://github.com/raveuk/Caudate-AI-VSCODE/issues"
+	},
+	"engines": {
+		"vscode": "^1.90.0"
+	},
+	"main": "./out/extension",
+	"categories": [
+		"AI",
+		"Chat",
+		"Programming Languages"
+	],
+	"extensionKind": [
+		"ui",
+		"workspace"
+	],
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"capabilities": {
+		"untrustedWorkspaces": {
+			"supported": "limited"
+		}
+	},
+	"contributes": {
+		"viewsContainers": {
+			"secondarySidebar": [
+				{
+					"id": "aether-ai",
+					"title": "Caudate AI",
+					"icon": "media/aether-icon.svg"
+				}
+			]
+		},
+		"views": {
+			"aether-ai": [
+				{
+					"type": "webview",
+					"id": "aether.chatView",
+					"name": "Caudate Agent",
+					"contextualTitle": "Caudate AI"
+				}
+			]
+		},
+		"commands": [
+			{ "command": "aether.focusChat", "title": "Open Agent / Chat", "category": "Caudate AI", "icon": "$(sparkle)" },
+			{ "command": "aether.openComposer", "title": "Open Agent Composer", "category": "Caudate AI", "icon": "$(wand)" },
+			{ "command": "aether.newChat", "title": "New Chat", "category": "Caudate AI", "icon": "$(add)" },
+			{ "command": "aether.openHistory", "title": "Chat History", "category": "Caudate AI", "icon": "$(history)" },
+			{ "command": "aether.openAgents", "title": "Parallel Worktree Agents", "category": "Caudate AI", "icon": "$(git-branch)" },
+			{ "command": "aether.openNotepads", "title": "Notepads", "category": "Caudate AI", "icon": "$(note)" },
+			{ "command": "aether.openSettings", "title": "Configure Providers, MCP & Index", "category": "Caudate AI", "icon": "$(settings-gear)" },
+			{ "command": "aether.addSelectionToChat", "title": "Add Selection to Chat", "category": "Caudate AI" },
+			{ "command": "aether.explainSelection", "title": "Explain Selected Code", "category": "Caudate AI" },
+			{ "command": "aether.fixProblems", "title": "Fix Problems in Active File", "category": "Caudate AI" },
+			{ "command": "aether.quickFixDiagnostic", "title": "Quick Fix Diagnostic with Aether", "category": "Caudate AI" },
+			{ "command": "aether.inlineEdit", "title": "Inline Edit", "category": "Caudate AI" },
+			{ "command": "aether.terminalInlineEdit", "title": "Terminal Inline Command (Ctrl+K)", "category": "Caudate AI" },
+			{ "command": "aether.acceptInlineEdit", "title": "Accept Inline Edit", "category": "Caudate AI" },
+			{ "command": "aether.rejectInlineEdit", "title": "Reject Inline Edit", "category": "Caudate AI" },
+			{ "command": "aether.retryInlineEdit", "title": "Retry Inline Edit", "category": "Caudate AI" },
+			{ "command": "aether.acceptInlineHunk", "title": "Accept Inline Edit Hunk", "category": "Caudate AI" },
+			{ "command": "aether.rejectInlineHunk", "title": "Reject Inline Edit Hunk", "category": "Caudate AI" },
+			{ "command": "aether.acceptNes", "title": "Accept Next Edit Prediction", "category": "Caudate AI" },
+			{ "command": "aether.dismissNes", "title": "Dismiss Next Edit Prediction", "category": "Caudate AI" },
+			{ "command": "aether.toggleAutocomplete", "title": "Toggle Tab Autocomplete", "category": "Caudate AI" },
+			{ "command": "aether.openTabSettings", "title": "Tab Settings", "category": "Caudate AI" },
+			{ "command": "aether.switchModel", "title": "Switch AI Model", "category": "Caudate AI" },
+			{ "command": "aether.generateCommitMessage", "title": "Generate Commit Message", "category": "Caudate AI", "icon": "$(sparkle)" },
+			{ "command": "aether.reviewGitDiff", "title": "AI Code Review (Git Diff)", "category": "Caudate AI", "icon": "$(eye)" },
+			{ "command": "aether.resolveMergeConflict", "title": "Resolve Merge Conflict with Aether AI", "category": "Caudate AI" },
+			{ "command": "aether.rebuildVectorIndex", "title": "Rebuild Semantic Codebase Index", "category": "Caudate AI" },
+			{ "command": "aether.editMcpConfig", "title": "Edit MCP Servers Config (.aether/mcp.json)", "category": "Caudate AI" },
+			{ "command": "aether.spawnWorktreeAgent", "title": "Run Parallel Agent in Git Worktree", "category": "Caudate AI" }
+		],
+		"keybindings": [
+			{ "command": "aether.focusChat", "key": "ctrl+l", "mac": "cmd+l" },
+			{ "command": "aether.openComposer", "key": "ctrl+i", "mac": "cmd+i" },
+			{ "command": "aether.inlineEdit", "key": "ctrl+k", "mac": "cmd+k", "when": "editorTextFocus && !editorReadonly" },
+			{ "command": "aether.terminalInlineEdit", "key": "ctrl+k", "mac": "cmd+k", "when": "terminalFocus" },
+			{ "command": "aether.acceptInlineEdit", "key": "ctrl+enter", "mac": "cmd+enter", "when": "aether.inlineEditPending" },
+			{ "command": "aether.rejectInlineEdit", "key": "escape", "when": "aether.inlineEditPending" },
+			{ "command": "aether.acceptNes", "key": "tab", "when": "editorTextFocus && aether.nesPending && !suggestWidgetVisible && !inlineSuggestionVisible" },
+			{ "command": "aether.dismissNes", "key": "escape", "when": "editorTextFocus && aether.nesPending" }
+		],
+		"menus": {
+			"view/title": [
+				{ "command": "aether.newChat", "when": "view == aether.chatView", "group": "navigation@1" },
+				{ "command": "aether.openAgents", "when": "view == aether.chatView", "group": "navigation@2" },
+				{ "command": "aether.openNotepads", "when": "view == aether.chatView", "group": "navigation@3" },
+				{ "command": "aether.openHistory", "when": "view == aether.chatView", "group": "navigation@4" },
+				{ "command": "aether.openSettings", "when": "view == aether.chatView", "group": "navigation@5" }
+			],
+			"scm/title": [
+				{ "command": "aether.generateCommitMessage", "when": "scmProvider == git", "group": "navigation@1" },
+				{ "command": "aether.reviewGitDiff", "when": "scmProvider == git", "group": "navigation@2" }
+			],
+			"editor/context": [
+				{ "command": "aether.inlineEdit", "group": "aether@1", "when": "editorTextFocus && !editorReadonly" },
+				{ "command": "aether.addSelectionToChat", "group": "aether@2", "when": "editorHasSelection" },
+				{ "command": "aether.explainSelection", "group": "aether@3", "when": "editorHasSelection" },
+				{ "command": "aether.fixProblems", "group": "aether@4", "when": "editorTextFocus" }
+			]
+		},
+		"configuration": {
+			"title": "Caudate AI",
+			"properties": {
+				"aether.provider": { "type": "string", "enum": ["openai-compatible", "ollama", "lmstudio"], "default": "ollama", "description": "Active AI provider for Chat, Agent, and Inline Edit." },
+				"aether.openai.baseUrl": { "type": "string", "default": "https://api.openai.com/v1", "description": "Base URL for OpenAI or OpenAI-compatible APIs (OpenRouter, DeepSeek, Groq, Together, vLLM, etc.)." },
+				"aether.openai.model": { "type": "string", "default": "gpt-4o", "description": "Model name for OpenAI-compatible provider." },
+				"aether.ollama.baseUrl": { "type": "string", "default": "http://localhost:11434", "description": "Base URL of local Ollama server." },
+				"aether.ollama.model": { "type": "string", "default": "qwen2.5-coder:7b", "description": "Local Ollama model name." },
+				"aether.lmstudio.baseUrl": { "type": "string", "default": "http://localhost:1234/v1", "description": "Base URL of local LM Studio server." },
+				"aether.lmstudio.model": { "type": "string", "default": "", "description": "LM Studio model ID (blank = auto-detect loaded model)." },
+				"aether.tab.enabled": { "type": "boolean", "default": true, "description": "Enable AI Tab ghost-text inline autocomplete." },
+				"aether.tab.nesEnabled": { "type": "boolean", "default": true, "description": "Enable Next Edit Prediction (Cursor Tab / NES) multi-line edit & jump suggestions." },
+				"aether.tab.provider": { "type": "string", "enum": ["same", "openai-compatible", "ollama", "lmstudio"], "default": "same", "description": "Provider used for Tab Autocomplete & NES." },
+				"aether.tab.model": { "type": "string", "default": "", "description": "Optional fast model override for Tab Autocomplete." },
+				"aether.tab.debounceMs": { "type": "number", "default": 320, "minimum": 100, "maximum": 2000, "description": "Debounce delay in ms before requesting Tab completion." },
+				"aether.index.embeddingModel": { "type": "string", "default": "", "description": "Optional embeddings model for semantic vector @codebase search (e.g., nomic-embed-text in Ollama or text-embedding-3-small in OpenAI)." },
+				"aether.agent.maxSteps": { "type": "number", "default": 16, "minimum": 1, "maximum": 50, "description": "Maximum autonomous tool-calling iterations per Agent turn." },
+				"aether.agent.autoApproveWrites": { "type": "boolean", "default": true, "description": "Automatically apply file edits made by the Agent (with Diff, Review Bar & Revert)." },
+				"aether.agent.autoApproveTerminal": { "type": "boolean", "default": false, "description": "Automatically run Agent terminal commands (destructive commands still require approval)." },
+				"aether.agent.commandAllowlist": { "type": "array", "items": { "type": "string" }, "default": ["git status", "git diff", "git log", "npm test", "pnpm test", "pytest", "dir", "ls"], "description": "Command prefixes auto-approved without prompting." },
+				"aether.agent.commandDenylist": { "type": "array", "items": { "type": "string" }, "default": [], "description": "Command substrings automatically denied." },
+				"aether.privacy.respectIgnoreFiles": { "type": "boolean", "default": true, "description": "Block sensitive files (.env, *.key, *.pem) and .aetherignore/.cursorignore patterns from AI indexing and tools." },
+				"aether.chat.maxContextTokens": { "type": "number", "default": 64000, "description": "Context window budget shown in the token meter." },
+				"aether.systemPrompt": { "type": "string", "default": "", "description": "Additional custom system instructions appended to every conversation." }
+			}
+		}
+	}
+}

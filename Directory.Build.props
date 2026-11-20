@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <ForceImportBeforeCppProps>$(MSBuildThisFileDirectory)build\win32\aether-no-spectre.props</ForceImportBeforeCppProps>
+  </PropertyGroup>
+</Project>
