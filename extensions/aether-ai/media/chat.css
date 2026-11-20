@@ -19,6 +19,28 @@ html, body {
 	background: var(--vscode-sideBar-background);
 }
 
+body.vscode-dark,
+body.vscode-high-contrast {
+	color-scheme: dark;
+}
+
+body.vscode-light,
+body.vscode-high-contrast-light {
+	color-scheme: light;
+}
+
+select {
+	background-color: var(--vscode-dropdown-background, var(--vscode-input-background, #252526));
+	color: var(--vscode-dropdown-foreground, var(--vscode-foreground, #cccccc));
+	border: 1px solid var(--vscode-dropdown-border, var(--vscode-input-border, rgba(255, 255, 255, 0.14)));
+}
+
+select option,
+select optgroup {
+	background-color: var(--vscode-dropdown-listBackground, var(--vscode-dropdown-background, #252526));
+	color: var(--vscode-dropdown-foreground, var(--vscode-foreground, #cccccc));
+}
+
 .hidden {
 	display: none !important;
 }
@@ -903,19 +925,20 @@ html, body {
 }
 
 .model-picker {
-	max-width: 135px;
-	background: transparent;
-	color: var(--vscode-descriptionForeground);
-	border: 1px solid var(--vscode-input-border, rgba(255, 255, 255, 0.1));
+	max-width: 160px;
+	background-color: var(--vscode-dropdown-background, var(--vscode-input-background, #252526));
+	color: var(--vscode-dropdown-foreground, var(--vscode-foreground, #cccccc));
+	border: 1px solid var(--vscode-dropdown-border, var(--vscode-input-border, rgba(255, 255, 255, 0.14)));
 	border-radius: 4px;
-	padding: 3px 5px;
+	padding: 3px 6px;
 	font-size: 11px;
+	cursor: pointer;
 	outline: none;
 }
 
 .model-picker:hover,
 .model-picker:focus {
-	color: var(--vscode-foreground);
+	color: var(--vscode-dropdown-foreground, var(--vscode-foreground, #ffffff));
 	border-color: var(--vscode-focusBorder);
 }
 
