@@ -102,21 +102,13 @@ export class WorkspaceIndex {
 		try {
 			const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`;
 			const res = await fetch(url, {
-				headers: { 'User-Agent': 'AetherIDE/1.0' },
+				headers: { 'User-Agent': 'CaudateIDE/1.0' },
 			});
 			if (!res.ok) {
 				return `Web search returned HTTP ${res.status}.`;
 			}
-			const html = await res.text();
-			const results: string[] = [];
-			const rx = /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]+class="result__snippet"[^>]*>([\s\S]*?)<\/a>/gi;
-			let m: RegExpExecArray | null;
-			while ((m = rx.exec(html)) !== null && results.length < 6) {
-				const href = decodeEntities(m[1]);
-				const title = stripTags(m[2]);
-				const snippet = stripTags(m[3]);
-				results.push(`- **${title}** (${href})\n  ${snippet}`);
-			}
+			const html = (await res.text()).slice(0, 200_000);
+			const results = extractDuckDuckGoResults(html, 6);
 			return results.length > 0 ? results.join('\n\n') : `No web results parsed for "${q}".`;
 		} catch (err) {
 			return `Web search failed: ${err instanceof Error ? err.message : String(err)}`;
@@ -124,10 +116,10 @@ export class WorkspaceIndex {
 	}
 
 	public async fetchAndCacheDoc(url: string): Promise<string> {
-		const cleanedUrl = url.trim();
+		const cleanedUrl = assertSafeHttpUrl(url);
 		const root = this.getWorkspaceRoot();
 		const cacheFile = root
-			? path.join(root, '.aether', 'docs', `${crypto.createHash('sha1').update(cleanedUrl).digest('hex').slice(0, 12)}.txt`)
+			? path.join(root, '.aether', 'docs', `${crypto.createHash('sha256').update(cleanedUrl).digest('hex').slice(0, 16)}.txt`)
 			: undefined;
 
 		if (cacheFile && fs.existsSync(cacheFile)) {
@@ -135,18 +127,12 @@ export class WorkspaceIndex {
 			return cached.slice(0, 12_000);
 		}
 
-		const res = await fetch(cleanedUrl, { headers: { 'User-Agent': 'AetherIDE/1.0' } });
+		const res = await fetch(cleanedUrl, { headers: { 'User-Agent': 'CaudateIDE/1.0' } });
 		if (!res.ok) {
 			throw new Error(`Failed to fetch docs (${res.status}): ${cleanedUrl}`);
 		}
-		const html = await res.text();
-		const text = stripTags(
-			html
-				.replace(/<script[\s\S]*?<\/script>/gi, ' ')
-				.replace(/<style[\s\S]*?<\/style>/gi, ' ')
-		)
-			.replace(/\s{2,}/g, ' ')
-			.trim();
+		const html = (await res.text()).slice(0, 500_000);
+		const text = extractPlainTextFromHtml(html);
 		const header = `Documentation URL: ${cleanedUrl}\n\n${text}`;
 		if (cacheFile) {
 			await fs.promises.mkdir(path.dirname(cacheFile), { recursive: true });
@@ -157,16 +143,41 @@ export class WorkspaceIndex {
 
 	public resolvePath(inputPath: string): { absolutePath: string; relativePath: string } {
 		const root = this.getWorkspaceRoot();
-		const normalized = inputPath.trim().replace(/^@/, '');
-		if (path.isAbsolute(normalized)) {
-			const rel = root ? path.relative(root, normalized).replace(/\\/g, '/') : normalized;
-			return { absolutePath: normalized, relativePath: rel };
-		}
 		if (!root) {
 			throw new Error('No workspace folder is currently open.');
 		}
-		const absolutePath = path.resolve(root, normalized);
-		const relativePath = path.relative(root, absolutePath).replace(/\\/g, '/');
+		const normalized = inputPath.trim().replace(/^@/, '');
+		if (!normalized) {
+			throw new Error('Path must not be empty.');
+		}
+		const resolvedRoot = path.resolve(root);
+		const absolutePath = path.isAbsolute(normalized)
+			? path.resolve(normalized)
+			: path.resolve(resolvedRoot, normalized);
+
+		const relCheck = path.relative(resolvedRoot, absolutePath);
+		if (relCheck.startsWith('..') || path.isAbsolute(relCheck)) {
+			throw new Error(`Access denied: path "${inputPath}" escapes the open workspace root.`);
+		}
+
+		// Prevent symlink escapes out of the workspace root
+		try {
+			const realRoot = fs.realpathSync(resolvedRoot);
+			const probe = fs.existsSync(absolutePath) ? absolutePath : path.dirname(absolutePath);
+			if (fs.existsSync(probe)) {
+				const realProbe = fs.realpathSync(probe);
+				const realRel = path.relative(realRoot, realProbe);
+				if (realRel.startsWith('..') || path.isAbsolute(realRel)) {
+					throw new Error(`Access denied: symlink target for "${inputPath}" escapes the workspace root.`);
+				}
+			}
+		} catch (err) {
+			if (err instanceof Error && err.message.startsWith('Access denied:')) {
+				throw err;
+			}
+		}
+
+		const relativePath = relCheck.replace(/\\/g, '/');
 		return { absolutePath, relativePath };
 	}
 
@@ -378,16 +389,134 @@ function extractBestSnippet(content: string, tokens: string[]): string {
 		.join('\n');
 }
 
-function stripTags(html: string): string {
-	return decodeEntities(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+function assertSafeHttpUrl(rawUrl: string): string {
+	const trimmed = rawUrl.trim();
+	let parsed: URL;
+	try {
+		parsed = new URL(trimmed);
+	} catch {
+		throw new Error(`Invalid documentation URL: "${trimmed}"`);
+	}
+	if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+		throw new Error(`Unsupported URL protocol "${parsed.protocol}". Only http: and https: are allowed.`);
+	}
+	const host = parsed.hostname.toLowerCase();
+	if (
+		host === '169.254.169.254' ||
+		host === '169.254.170.2' ||
+		host.startsWith('169.254.') ||
+		host === 'metadata.google.internal' ||
+		host === 'metadata.goog'
+	) {
+		throw new Error(`Blocked cloud metadata host "${host}" for security.`);
+	}
+	return parsed.toString();
 }
 
+function extractDuckDuckGoResults(html: string, maxResults: number): string[] {
+	const results: string[] = [];
+	let cursor = 0;
+	const marker = 'class="result__a"';
+	while (results.length < maxResults) {
+		const clsIdx = html.indexOf(marker, cursor);
+		if (clsIdx === -1) {
+			break;
+		}
+		const tagStart = html.lastIndexOf('<a', clsIdx);
+		const tagEnd = html.indexOf('>', clsIdx);
+		const closeA = tagEnd !== -1 ? html.indexOf('</a>', tagEnd) : -1;
+		if (tagStart === -1 || tagEnd === -1 || closeA === -1) {
+			cursor = clsIdx + marker.length;
+			continue;
+		}
+		const openTag = html.slice(tagStart, tagEnd);
+		const hrefIdx = openTag.indexOf('href="');
+		let href = '';
+		if (hrefIdx !== -1) {
+			const hrefEnd = openTag.indexOf('"', hrefIdx + 6);
+			if (hrefEnd !== -1) {
+				href = decodeEntities(openTag.slice(hrefIdx + 6, hrefEnd));
+			}
+		}
+		const title = extractPlainTextFromHtml(html.slice(tagEnd + 1, closeA));
+
+		let snippet = '';
+		const snipMarker = 'class="result__snippet"';
+		const snipIdx = html.indexOf(snipMarker, closeA);
+		const nextResultIdx = html.indexOf(marker, closeA);
+		if (snipIdx !== -1 && (nextResultIdx === -1 || snipIdx < nextResultIdx)) {
+			const snipTagEnd = html.indexOf('>', snipIdx);
+			const snipClose = snipTagEnd !== -1 ? html.indexOf('</a>', snipTagEnd) : -1;
+			if (snipTagEnd !== -1 && snipClose !== -1) {
+				snippet = extractPlainTextFromHtml(html.slice(snipTagEnd + 1, snipClose));
+			}
+		}
+
+		if (title && href) {
+			results.push(`- **${title}** (${href})\n  ${snippet}`);
+		}
+		cursor = closeA + 4;
+	}
+	return results;
+}
+
+/**
+ * Linear O(n) character-state HTML-to-plain-text extractor (no nested regexes, no ReDoS).
+ */
+function extractPlainTextFromHtml(html: string): string {
+	const out: string[] = [];
+	let i = 0;
+	const len = html.length;
+	const lower = html.toLowerCase();
+
+	while (i < len) {
+		const ch = html[i];
+		if (ch === '<') {
+			if (lower.startsWith('<script', i)) {
+				const end = lower.indexOf('</script', i + 7);
+				if (end === -1) {
+					break;
+				}
+				const gt = html.indexOf('>', end + 8);
+				i = gt === -1 ? len : gt + 1;
+				out.push(' ');
+				continue;
+			}
+			if (lower.startsWith('<style', i)) {
+				const end = lower.indexOf('</style', i + 6);
+				if (end === -1) {
+					break;
+				}
+				const gt = html.indexOf('>', end + 7);
+				i = gt === -1 ? len : gt + 1;
+				out.push(' ');
+				continue;
+			}
+			const gt = html.indexOf('>', i + 1);
+			if (gt === -1) {
+				break;
+			}
+			i = gt + 1;
+			out.push(' ');
+			continue;
+		}
+		out.push(ch);
+		i++;
+	}
+
+	return decodeEntities(out.join('')).replace(/\s+/g, ' ').trim();
+}
+
+const ENTITY_MAP: Record<string, string> = {
+	'&lt;': '<',
+	'&gt;': '>',
+	'&quot;': '"',
+	'&#39;': "'",
+	'&nbsp;': ' ',
+	'&amp;': '&',
+};
+
 function decodeEntities(s: string): string {
-	return s
-		.replace(/&amp;/g, '&')
-		.replace(/&lt;/g, '<')
-		.replace(/&gt;/g, '>')
-		.replace(/&quot;/g, '"')
-		.replace(/&#39;/g, "'")
-		.replace(/&nbsp;/g, ' ');
+	// Single-pass entity decoding prevents double-unescaping (e.g. &amp;lt; -> &lt;)
+	return s.replace(/&(?:lt|gt|quot|#39|nbsp|amp);/g, m => ENTITY_MAP[m] ?? m);
 }

@@ -255,9 +255,19 @@ export class BuiltinBrowserAgent implements vscode.Disposable {
 	}
 
 	private async navigate(url: string): Promise<BrowserActionResult> {
+		let parsed: URL;
+		try {
+			parsed = new URL(url.trim());
+		} catch {
+			return { output: `Invalid URL: "${url}"`, isError: true };
+		}
+		if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+			return { output: `Blocked URL protocol "${parsed.protocol}". Only http: and https: URLs are permitted in the Browser Agent.`, isError: true };
+		}
+		const safeUrl = parsed.toString();
 		this.consoleErrors = [];
 		this.failedRequests = [];
-		await this.cdp('Page.navigate', { url });
+		await this.cdp('Page.navigate', { url: safeUrl });
 		await sleep(1800);
 		const summary = await this.cdp('Runtime.evaluate', {
 			returnByValue: true,

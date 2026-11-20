@@ -65,8 +65,8 @@ export class IgnoreAndSecurityService {
 	public assertAllowedPath(relPath: string, workspaceRoot?: string, respectIgnoreFiles = true): void {
 		if (this.isIgnored(relPath, workspaceRoot, respectIgnoreFiles)) {
 			throw new Error(
-				`Access blocked by Aether secret/ignore policy for "${relPath}". ` +
-				`Files matching .aetherignore, .cursorignore, or secret patterns (.env, *.key, *.pem) are protected.`
+				`Access blocked by Caudate secret/ignore policy for "${relPath}". ` +
+				`Files matching .caudateignore, .aetherignore, .cursorignore, or secret patterns (.env, *.key, *.pem) are protected.`
 			);
 		}
 	}
@@ -99,14 +99,19 @@ export class IgnoreAndSecurityService {
 			return { decision: 'allow', reason: 'Auto-approve terminal enabled' };
 		}
 
-		// Check user allowlist prefixes
-		for (const entry of settings.commandAllowlist) {
-			const clean = entry.trim();
-			if (!clean) {
-				continue;
-			}
-			if (trimmed.toLowerCase().startsWith(clean.toLowerCase())) {
-				return { decision: 'allow', reason: `Allowed by command allowlist "${clean}"` };
+		// Never auto-approve via prefix allowlist if command chains/pipes/substitutes/redirects shell commands
+		const hasShellChaining = /(?:&&|\|\||[;|`<>]|\$\(|\r|\n)/.test(trimmed);
+		if (!hasShellChaining) {
+			const lowerCmd = trimmed.toLowerCase();
+			for (const entry of settings.commandAllowlist) {
+				const clean = entry.trim();
+				if (!clean) {
+					continue;
+				}
+				const lowerPrefix = clean.toLowerCase();
+				if (lowerCmd === lowerPrefix || (lowerCmd.startsWith(lowerPrefix) && /\s/.test(trimmed[clean.length]))) {
+					return { decision: 'allow', reason: `Allowed by command allowlist "${clean}"` };
+				}
 			}
 		}
 

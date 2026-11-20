@@ -206,9 +206,29 @@ export class ParallelWorktreeManager {
 
 	private async runScopedTool(task: ParallelAgentTask, name: string, args: Record<string, unknown>): Promise<string> {
 		const resolveSafe = (rel: string) => {
-			const abs = path.resolve(task.worktreePath, rel || '.');
-			if (!abs.startsWith(path.resolve(task.worktreePath))) {
+			const rootAbs = path.resolve(task.worktreePath);
+			const abs = path.resolve(rootAbs, rel || '.');
+			const relToRoot = path.relative(rootAbs, abs);
+			if (relToRoot.startsWith('..') || path.isAbsolute(relToRoot)) {
 				throw new Error('Path escapes worktree root');
+			}
+			try {
+				const realRoot = fs.realpathSync(rootAbs);
+				const probe = fs.existsSync(abs) ? abs : path.dirname(abs);
+				if (fs.existsSync(probe)) {
+					const realRel = path.relative(realRoot, fs.realpathSync(probe));
+					if (realRel.startsWith('..') || path.isAbsolute(realRel)) {
+						throw new Error('Symlink escapes worktree root');
+					}
+				}
+			} catch (err) {
+				if (err instanceof Error && err.message.includes('escapes worktree root')) {
+					throw err;
+				}
+			}
+			const normalizedRel = relToRoot.replace(/\\/g, '/');
+			if (normalizedRel && normalizedRel !== '.' && this.workspaceIndex.isPathIgnored(normalizedRel)) {
+				throw new Error(`Access blocked by Caudate secret/ignore policy for "${normalizedRel}".`);
 			}
 			return abs;
 		};
@@ -244,7 +264,7 @@ export class ParallelWorktreeManager {
 			}
 			if (name === 'search_files') {
 				const query = String(args.query ?? '').toLowerCase();
-				const out = await runGit(task.worktreePath, ['grep', '-n', '-i', query]).catch(() => '');
+				const out = await runGit(task.worktreePath, ['grep', '-n', '-i', '--', query]).catch(() => '');
 				return out.slice(0, 5000) || `No matches for "${query}"`;
 			}
 			return `Unsupported tool in worktree: ${name}`;

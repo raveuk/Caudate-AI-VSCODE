@@ -107,7 +107,16 @@
 			.replace(/&/g, '&amp;')
 			.replace(/</g, '&lt;')
 			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;');
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
+	function sanitizeImageDataUrl(url) {
+		const s = String(url ?? '').trim();
+		if (/^data:image\/(png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(s)) {
+			return escapeHtml(s);
+		}
+		return '';
 	}
 
 	function renderMarkdown(rawText) {
@@ -166,12 +175,18 @@
 	}
 
 	function renderImages() {
-		els.imagesRow.innerHTML = state.images.map(img => `
+		els.imagesRow.innerHTML = state.images.map(img => {
+			const safeSrc = sanitizeImageDataUrl(img.dataUrl);
+			if (!safeSrc) {
+				return '';
+			}
+			return `
 			<span class="img-chip" title="${escapeHtml(img.name)}">
-				<img src="${img.dataUrl}" alt="${escapeHtml(img.name)}" />
+				<img src="${safeSrc}" alt="${escapeHtml(img.name)}" />
 				<button data-remove-img="${escapeHtml(img.id)}" title="Remove">✕</button>
 			</span>
-		`).join('');
+		`;
+		}).join('');
 	}
 
 	function readFilesAsImages(fileList) {
@@ -219,8 +234,9 @@
 		}
 
 		const showOutput = card.output && (card.toolName === 'run_terminal_command' || card.status === 'running' || card.status === 'error' || card.status === 'denied' || card.toolName.startsWith('browser_') || card.toolName.startsWith('mcp__'));
-		const screenshotHtml = card.screenshotDataUrl
-			? `<img class="tool-screenshot" src="${card.screenshotDataUrl}" alt="Browser verification screenshot" />`
+		const safeScreenshotSrc = sanitizeImageDataUrl(card.screenshotDataUrl);
+		const screenshotHtml = safeScreenshotSrc
+			? `<img class="tool-screenshot" src="${safeScreenshotSrc}" alt="Browser verification screenshot" />`
 			: '';
 
 		return `
@@ -278,7 +294,10 @@
 				const nextTurn = session.turns[idx + 1];
 				const hasEdits = Boolean(nextTurn && Array.isArray(nextTurn.toolCards) && nextTurn.toolCards.some(c => c.editRecord && !c.editRecord.reverted));
 				const chipsHtml = (turn.contextChips || []).map(c => `<span class="chip">@${escapeHtml(c.label)}</span>`).join('');
-				const imgsHtml = (turn.images || []).map(img => `<img class="turn-thumb" src="${img.dataUrl}" alt="${escapeHtml(img.name)}" />`).join('');
+				const imgsHtml = (turn.images || []).map(img => {
+					const safeSrc = sanitizeImageDataUrl(img.dataUrl);
+					return safeSrc ? `<img class="turn-thumb" src="${safeSrc}" alt="${escapeHtml(img.name)}" />` : '';
+				}).join('');
 				return `
 					<div class="turn turn-user">
 						<div class="turn-user-header">

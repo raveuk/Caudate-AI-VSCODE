@@ -142,6 +142,22 @@ overrides:
   '@vscode/web-editors@0.0.2-104>@vscode/hubrpc': 0.0.2-54
   '@vscode/web-editors@0.0.2-41>@vscode/hubrpc': 0.0.2-15
   '@azure/msal-node-extensions@5.3.2>keytar': file:extensions/microsoft-authentication/packageMocks/keytar
+  # Security CVE overrides (Critical & High — semver-safe same-major)
+  'proxy-addr@>=1.1.0 <2.0.8': '^2.0.8'
+  'shell-quote@>=1.8.4 <1.11.0': '^1.11.0'
+  'postcss@>=8.0.0 <=8.5.17': '^8.5.18'
+  'undici@>=7.0.0 <7.30.1': '^7.30.1'
+  '@modelcontextprotocol/sdk@>=1.10.0 <1.32.0': '^1.32.0'
+  'node-forge@>=1.0.0 <=1.4.0': '^1.4.1'
+  'markdown-it@>=14.1.0 <14.3.3': '^14.3.3'
+  'zod@>=4.0.0 <4.6.6': '^4.6.6'
+  'body-parser@>=2.0.0 <2.4.0': '^2.4.0'
+  'follow-redirects@>=1.16.0 <=1.16.1': '^1.16.2'
+  'braces@>=3.0.0 <3.0.3': '^3.0.3'
+  'decode-uri-component@<=0.5.0': '^0.5.1'
+  'image-size@>=2.0.0 <=2.0.2': '^2.0.3'
+  'vite@>=8.0.0 <=8.1.5': '^8.1.6'
+  'hono@>=4.0.0 <=4.13.15': '^4.13.16'
 # @vscode/extension-telemetry requires @microsoft/applicationinsights-common without declaring it. Each
 # version gets the one of its @microsoft/applicationinsights-web-basic, which the extensions bundle
 # anyway, instead of the one that pnpm happens to hoist for the whole workspace.

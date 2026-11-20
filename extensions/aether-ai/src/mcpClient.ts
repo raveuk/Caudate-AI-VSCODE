@@ -46,9 +46,20 @@ class StdioMcpConnection {
 		if (!this.config.command) {
 			throw new Error('Missing command for stdio MCP server');
 		}
-		this.proc = spawn(this.config.command, this.config.args ?? [], {
+		const cmd = this.config.command.trim();
+		if (!cmd || /[;&|`$<>()\r\n]/.test(cmd)) {
+			throw new Error(`Rejected unsafe MCP server command: "${this.config.command}"`);
+		}
+		const args = (this.config.args ?? []).map(a => String(a));
+		const needsWindowsCmd = process.platform === 'win32' && /\.(cmd|bat)$/i.test(cmd);
+		if (needsWindowsCmd && args.some(a => /[&|<>^%\r\n]/.test(a))) {
+			throw new Error(`Rejected unsafe shell metacharacters in arguments for MCP server "${this.name}"`);
+		}
+		const spawnBin = needsWindowsCmd ? (process.env.COMSPEC || 'cmd.exe') : cmd;
+		const spawnArgs = needsWindowsCmd ? ['/d', '/s', '/c', cmd, ...args] : args;
+		this.proc = spawn(spawnBin, spawnArgs, {
 			env: { ...process.env, ...(this.config.env ?? {}) },
-			shell: process.platform === 'win32',
+			shell: false,
 		});
 
 		this.proc.stdout.on('data', chunk => {
@@ -149,10 +160,14 @@ class HttpMcpConnection {
 		if (!this.config.url) {
 			throw new Error('Missing url for HTTP MCP server');
 		}
+		const parsed = new URL(this.config.url);
+		if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+			throw new Error(`Unsupported MCP URL protocol "${parsed.protocol}". Only http: and https: are allowed.`);
+		}
 		await this.request('initialize', {
 			protocolVersion: '2024-11-05',
 			capabilities: {},
-			clientInfo: { name: 'aether-ide', version: '1.0.0' },
+			clientInfo: { name: 'caudate-ide', version: '1.0.0' },
 		}).catch(() => undefined);
 	}
 
@@ -266,10 +281,17 @@ export class McpClientManager implements vscode.Disposable {
 		this.disconnectAll();
 
 		const merged: Record<string, McpServerConfig> = {};
+		const workspacePaths = workspaceRoot && vscode.workspace.isTrusted
+			? [
+				path.join(workspaceRoot, '.caudate', 'mcp.json'),
+				path.join(workspaceRoot, '.aether', 'mcp.json'),
+				path.join(workspaceRoot, '.cursor', 'mcp.json'),
+			]
+			: [];
 		const paths = [
 			path.join(os.homedir(), '.caudate-ide', 'mcp.json'),
 			path.join(os.homedir(), '.aether-ide', 'mcp.json'),
-			...(workspaceRoot ? [path.join(workspaceRoot, '.caudate', 'mcp.json'), path.join(workspaceRoot, '.aether', 'mcp.json'), path.join(workspaceRoot, '.cursor', 'mcp.json')] : []),
+			...workspacePaths,
 		];
 
 		for (const filePath of paths) {
