@@ -19,6 +19,7 @@ node scripts\generate-caudate-inno-bitmaps.mjs
 
 Write-Host "3/5 Building standalone Windows x64 package (VSCode-win32-x64)..." -ForegroundColor Cyan
 pnpm run gulp vscode-win32-x64-min
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue '..\VSCode-win32-x64\bin\copilot-shim','..\VSCode-win32-x64\resources\app\extensions\copilot'
 
 Write-Host "4/5 Preparing Windows updater helper..." -ForegroundColor Cyan
 pnpm run gulp vscode-win32-x64-inno-updater
