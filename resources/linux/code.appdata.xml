@@ -4,15 +4,11 @@
 	<metadata_license>@@LICENSE@@</metadata_license>
 	<project_license>@@LICENSE@@</project_license>
 	<name>@@NAME_LONG@@</name>
-	<url type="homepage">https://code.visualstudio.com</url>
-	<summary>Visual Studio Code. Code editing. Redefined.</summary>
+	<url type="homepage">https://github.com/raveuk/Caudate-AI-VSCODE</url>
+	<url type="bugtracker">https://github.com/raveuk/Caudate-AI-VSCODE/issues</url>
+	<developer_name>Rave Manji</developer_name>
+	<summary>AI-native desktop code editor built on VS Code (Code - OSS).</summary>
 	<description>
-		<p>Visual Studio Code is a new choice of tool that combines the simplicity of a code editor with what developers need for the core edit-build-debug cycle. See https://code.visualstudio.com/docs/setup/linux for installation instructions and FAQ.</p>
+		<p>Caudate IDE combines autonomous multi-agent workflows, inline diff editing (Ctrl+K), Next Edit Prediction, headless browser verification, MCP tool support, and local/cloud AI providers (Ollama, LM Studio, OpenAI-compatible APIs) with zero mandatory sign-in.</p>
 	</description>
-	<screenshots>
-		<screenshot type="default">
-			<image>https://code.visualstudio.com/home/home-screenshot-linux-lg.png</image>
-			<caption>Editing TypeScript and searching for extensions</caption>
-		</screenshot>
-	</screenshots>
 </component>

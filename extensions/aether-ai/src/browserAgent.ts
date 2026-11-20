@@ -351,7 +351,16 @@ function findChromiumExecutable(): string | undefined {
 				'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 				'/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
 			]
-			: ['/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser'];
+			: [
+				'/usr/bin/google-chrome',
+				'/usr/bin/google-chrome-stable',
+				'/usr/bin/chromium',
+				'/usr/bin/chromium-browser',
+				'/snap/bin/chromium',
+				'/usr/bin/microsoft-edge',
+				'/usr/bin/microsoft-edge-stable',
+				'/usr/bin/brave-browser',
+			];
 	return candidates.find(p => fs.existsSync(p));
 }
 

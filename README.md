@@ -44,7 +44,7 @@ It combines the autonomous multi-agent workflows of **Antigravity IDE** and the 
 
 ## Quick Start
 
-### Clone & Build from Source (Windows)
+### Windows (Build & Launch)
 Prerequisites: **Node.js 24**, **pnpm 12**, **Python 3**, and **Visual Studio 2022** (*Desktop development with C++*).
 
 ```powershell
@@ -55,22 +55,69 @@ $env:VSCODE_SKIP_NODE_VERSION_CHECK="1"
 pnpm install
 pnpm run build-fast
 pnpm run electron
+
+# Launch Caudate IDE
+.\launch-caudate.bat
+
+# Optional: Install Desktop/Start Menu shortcuts & `caudate` CLI on PATH
+powershell -ExecutionPolicy Bypass -File .\scripts\install-caudate-desktop.ps1
+caudate .
+
+# Optional: Build standalone Windows package (fast ~1-2s startup)
+powershell -ExecutionPolicy Bypass -File .\scripts\build-production.ps1
 ```
 
-### Launch Caudate IDE
-```powershell
-.\launch-caudate.bat
-```
-Or install Desktop & Start Menu shortcuts and the `caudate` CLI command on `PATH`:
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-caudate-desktop.ps1
+---
+
+### Linux (Ubuntu / Debian / Fedora / Arch — X11 & Wayland)
+
+#### 1. Install System Build Dependencies
+- **Ubuntu / Debian**:
+  ```bash
+  sudo apt-get update
+  sudo apt-get install -y git python3 build-essential g++ libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev pkg-config
+  ```
+- **Fedora**:
+  ```bash
+  sudo dnf install -y git python3 gcc-c++ make libX11-devel libxkbfile-devel libsecret-devel krb5-devel pkgconfig
+  ```
+- **Arch Linux**:
+  ```bash
+  sudo pacman -S --needed git python base-devel libx11 libxkbfile libsecret krb5 pkgconf
+  ```
+
+#### 2. Clone, Build & Launch on Linux
+Prerequisites: **Node.js 24** and **pnpm 12** (`npm install -g pnpm@12.16.0`).
+```bash
+git clone https://github.com/raveuk/Caudate-AI-VSCODE.git
+cd Caudate-AI-VSCODE
+
+export VSCODE_SKIP_NODE_VERSION_CHECK=1
+pnpm install
+pnpm run build-fast
+pnpm run electron
+
+# Launch Caudate IDE (auto-detects Wayland / X11)
+chmod +x launch-caudate.sh
+./launch-caudate.sh
+
+# Install App Menu icon (.desktop) & `caudate` CLI command
+chmod +x scripts/install-caudate-linux.sh
+./scripts/install-caudate-linux.sh
 caudate .
 ```
 
-### Build Standalone Windows Package
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\build-production.ps1
+#### 3. Build Standalone Linux Packages (`.tar.gz`, `.deb`, `.rpm`)
+```bash
+chmod +x scripts/build-linux.sh
+./scripts/build-linux.sh          # Standalone .tar.gz
+./scripts/build-linux.sh --deb    # + Debian/Ubuntu .deb package
+./scripts/build-linux.sh --rpm    # + Fedora/RHEL .rpm package
+./scripts/build-linux.sh --all    # Build all formats
 ```
+
+#### Automated Cross-Platform Releases (GitHub Actions)
+Push a version tag (e.g. `git tag v1.0.0 && git push origin v1.0.0`) or run the **Release Caudate IDE (Linux & Windows)** workflow from the **Actions** tab to automatically build and publish Linux x64 (`.deb` + `.tar.gz`) and Windows x64 (`.zip`) installers to [GitHub Releases](https://github.com/raveuk/Caudate-AI-VSCODE/releases).
 
 ---
 

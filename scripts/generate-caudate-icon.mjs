@@ -131,3 +131,9 @@ for (const rel of ['resources/win32/code.ico', 'resources/win32/caudate.ico']) {
 	fs.writeFileSync(path.join(root, rel), ico);
 	console.log('Generated icon:', rel, ico.length, 'bytes');
 }
+
+const linuxPng = renderCaudatePng(512);
+for (const rel of ['resources/linux/code.png', 'resources/linux/caudate.png']) {
+	fs.writeFileSync(path.join(root, rel), linuxPng);
+	console.log('Generated Linux PNG icon:', rel, linuxPng.length, 'bytes');
+}
