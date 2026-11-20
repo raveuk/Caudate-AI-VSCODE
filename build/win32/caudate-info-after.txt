@@ -1,0 +1,32 @@
+CAUDATE IDE v1.0.0 — QUICK START GUIDE
+
+Thank you for installing Caudate IDE!
+
+========================================================================
+GETTING STARTED WITH CAUDATE AI
+========================================================================
+
+1. CONNECT AN AI MODEL (No sign-in required)
+   - Local Ollama: Start Ollama and Caudate AI automatically detects
+     your installed local models (http://localhost:11434).
+   - Local LM Studio: Enable the local server (http://localhost:1234/v1)
+     and pick LM Studio from the provider dropdown.
+   - Cloud / OpenAI-Compatible API: Click the gear icon in the Caudate AI
+     panel to enter your API key and Base URL (OpenAI, OpenRouter,
+     DeepSeek, Groq, vLLM, etc.).
+
+2. ESSENTIAL KEYBOARD SHORTCUTS
+   - Ctrl+Shift+I   Focus / toggle the Caudate AI panel (right sidebar)
+   - Ctrl+K         Inline Edit in editor, or AI command in terminal
+   - Ctrl+L         Add selected code directly to Caudate AI chat
+   - Ctrl+.         AI Quick Fix on errors & warnings
+   - Tab            Accept AI Autocomplete / Next Edit Suggestion
+
+3. COMMAND-LINE USAGE
+   Open a new terminal and run:
+       caudate .
+
+4. FEEDBACK & ISSUE REPORTING
+   https://github.com/raveuk/Caudate-AI-VSCODE/issues
+
+Click Next to finish setup and launch Caudate IDE.

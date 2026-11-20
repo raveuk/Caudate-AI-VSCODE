@@ -483,7 +483,13 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
 function hasAuthenticodeSignature(filePath: string): Promise<boolean> {
 	return new Promise((resolve, reject) => {
 		const proc = cp.spawn('signtool.exe', ['verify', '/pa', filePath]);
-		proc.on('error', reject);
+		proc.on('error', err => {
+			if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') {
+				resolve();
+			} else {
+				reject(err);
+			}
+		});
 		proc.on('exit', code => resolve(code === 0));
 	});
 }
@@ -500,7 +506,13 @@ async function stripAuthenticodeSignature(filePath: string): Promise<void> {
 		let out = '';
 		proc.stdout?.on('data', chunk => out += chunk.toString());
 		proc.stderr?.on('data', chunk => out += chunk.toString());
-		proc.on('error', reject);
+		proc.on('error', err => {
+			if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') {
+				resolve();
+			} else {
+				reject(err);
+			}
+		});
 		proc.on('exit', code => {
 			if (code === 0) {
 				resolve();
@@ -537,11 +549,11 @@ function patchWin32DependenciesTask(destinationFolderName: string) {
 			await rcedit(fullPath, {
 				'file-version': baseVersion,
 				'version-string': {
-					'CompanyName': 'Microsoft Corporation',
+					'CompanyName': 'Rave Manji',
 					'FileDescription': product.nameLong,
 					'FileVersion': packageJson.version,
 					'InternalName': basename,
-					'LegalCopyright': 'Copyright (C) 2026 Microsoft. All rights reserved',
+					'LegalCopyright': 'Copyright (C) 2026 Rave Manji (Caudate IDE)',
 					'OriginalFilename': basename,
 					'ProductName': product.nameLong,
 					'ProductVersion': packageJson.version,

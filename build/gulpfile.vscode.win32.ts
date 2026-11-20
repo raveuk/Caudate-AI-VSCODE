@@ -86,6 +86,7 @@ function buildWin32Setup(arch: string, target: string): task.CallbackTask {
 			NameShort: product.nameShort,
 			DirName: product.win32DirName,
 			Version: pkg.version,
+			CaudateVersion: (product as typeof product & { caudateVersion?: string }).caudateVersion || '1.0.0',
 			RawVersion: pkg.version.replace(/-\w+$/, ''),
 			Commit: commit,
 			NameVersion: product.win32NameVersion + (target === 'user' ? ' (User)' : ''),
@@ -123,12 +124,7 @@ function buildWin32Setup(arch: string, target: string): task.CallbackTask {
 			}
 		}
 
-		if (fs.existsSync(path.join(sourcePath, 'bin', 'copilot-shim', 'copilot.exe'))) {
-			definitions['CopilotShim'] = 'true';
-			if (fs.existsSync(path.join(sourcePath, 'bin', 'copilot-shim', 'copilot'))) {
-				definitions['CopilotShimLauncher'] = 'true';
-			}
-		}
+		// Caudate IDE uses Caudate AI (built-in) and intentionally omits the GitHub Copilot CLI wizard page.
 
 		fs.writeFileSync(productJsonPath, JSON.stringify(productJson, undefined, '\t'));
 

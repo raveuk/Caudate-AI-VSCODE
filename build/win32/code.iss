@@ -7,15 +7,15 @@
 [Setup]
 AppId={#AppId}
 AppName={#NameLong}
-AppVerName={#NameVersion}
-AppPublisher=Microsoft Corporation
-AppPublisherURL=https://code.visualstudio.com/
-AppSupportURL=https://code.visualstudio.com/
-AppUpdatesURL=https://code.visualstudio.com/
+AppVerName={#NameVersion} {#CaudateVersion}
+AppPublisher=Rave Manji
+AppPublisherURL=https://github.com/raveuk/Caudate-AI-VSCODE
+AppSupportURL=https://github.com/raveuk/Caudate-AI-VSCODE/issues
+AppUpdatesURL=https://github.com/raveuk/Caudate-AI-VSCODE/releases
 DefaultGroupName={#NameLong}
 AllowNoIcons=yes
 OutputDir={#OutputDir}
-OutputBaseFilename=VSCodeSetup
+OutputBaseFilename=CaudateIDESetup-{#Arch}-{#CaudateVersion}
 Compression=lzma
 SolidCompression=yes
 AppMutex={code:GetAppMutex}
@@ -28,12 +28,21 @@ ChangesEnvironment=true
 ChangesAssociations=true
 MinVersion=10.0
 SourceDir={#SourceDir}
-AppVersion={#Version}
-VersionInfoVersion={#RawVersion}
+AppVersion={#CaudateVersion}
+VersionInfoVersion={#CaudateVersion}.0
+VersionInfoCompany=Rave Manji
+VersionInfoProductName=Caudate IDE
+VersionInfoDescription=Caudate IDE Setup Installer
 ShowLanguageDialog=auto
 ArchitecturesAllowed={#ArchitecturesAllowed}
 ArchitecturesInstallIn64BitMode={#ArchitecturesInstallIn64BitMode}
 WizardStyle=modern
+DisableWelcomePage=no
+DisableProgramGroupPage=no
+DisableReadyPage=no
+DisableFinishedPage=no
+InfoBeforeFile={#RepoDir}\build\win32\caudate-info-before.txt
+InfoAfterFile={#RepoDir}\build\win32\caudate-info-after.txt
 
 // We've seen an uptick on broken installations from updates which were unable
 // to shutdown VS Code. We rely on the fact that the update signals
@@ -82,13 +91,24 @@ Type: files; Name: "{app}\old_*"
 Type: files; Name: "{app}\new_*"
 Type: files; Name: "{app}\updating_version"
 
+[Types]
+Name: "full"; Description: "Full installation (Caudate IDE + Caudate AI v2.0.0 + CLI + Explorer integration)"
+Name: "compact"; Description: "Compact installation (Caudate IDE + Caudate AI v2.0.0 only)"
+Name: "custom"; Description: "Custom installation"; Flags: iscustom
+
+[Components]
+Name: "core"; Description: "Caudate IDE Core Desktop Editor (Code - OSS + Electron + Open VSX)"; Types: full compact custom; Flags: fixed
+Name: "ai"; Description: "Caudate AI v2.0.0 Engine (Agent/Ask/Plan, Inline Edit, Tab NES, MCP, Browser Agent)"; Types: full compact custom; Flags: fixed
+Name: "cli"; Description: "Command-Line Interface ('caudate' terminal launcher & PATH support)"; Types: full custom
+Name: "explorer"; Description: "Windows Explorer Integration ('Open with Caudate IDE' & file associations)"; Types: full custom
+
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
-Name: "addcontextmenufiles"; Description: "{cm:AddContextMenuFiles,{#NameShort}}"; GroupDescription: "{cm:Other}"; Flags: unchecked
-Name: "addcontextmenufolders"; Description: "{cm:AddContextMenuFolders,{#NameShort}}"; GroupDescription: "{cm:Other}"; Flags: unchecked
-Name: "associatewithfiles"; Description: "{cm:AssociateWithFiles,{#NameShort}}"; GroupDescription: "{cm:Other}"
-Name: "addtopath"; Description: "{cm:AddToPath}"; GroupDescription: "{cm:Other}"
+Name: "addcontextmenufiles"; Description: "{cm:AddContextMenuFiles,{#NameShort}}"; GroupDescription: "{cm:Other}"; Components: explorer
+Name: "addcontextmenufolders"; Description: "{cm:AddContextMenuFolders,{#NameShort}}"; GroupDescription: "{cm:Other}"; Components: explorer
+Name: "associatewithfiles"; Description: "{cm:AssociateWithFiles,{#NameShort}}"; GroupDescription: "{cm:Other}"; Components: explorer
+Name: "addtopath"; Description: "{cm:AddToPath}"; GroupDescription: "{cm:Other}"; Components: cli
 Name: "runcode"; Description: "{cm:RunAfter,{#NameShort}}"; GroupDescription: "{cm:Other}"; Check: WizardSilent
 
 [Dirs]
@@ -106,11 +126,11 @@ Source: "bin\copilot-shim\copilot"; Flags: dontcopy noencryption
 Source: "*"; Excludes: "\CodeSignSummary*.md,\tools,\tools\*,\policies,\policies\*,\appx,\appx\*,\{#ProductJsonRelativePath},\{#ExeBasename}.exe,\{#ExeBasename}.VisualElementsManifest.xml,\bin,\bin\*"; DestDir: "{code:GetDestDir}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#ExeBasename}.exe"; DestDir: "{code:GetDestDir}"; DestName: "{code:GetExeBasename}"; Flags: ignoreversion
 Source: "{#ExeBasename}.VisualElementsManifest.xml"; DestDir: "{code:GetDestDir}"; DestName: "{code:GetVisualElementsManifest}"; Flags: ignoreversion
-Source: "tools\*"; DestDir: "{app}\{#VersionedResourcesFolder}\tools"; Flags: ignoreversion
+Source: "tools\*"; DestDir: "{app}\{#VersionedResourcesFolder}\tools"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "policies\*"; DestDir: "{code:GetDestDir}\{#VersionedResourcesFolder}\policies"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
-Source: "bin\{#TunnelApplicationName}.exe"; DestDir: "{code:GetDestDir}\bin"; DestName: "{code:GetBinDirTunnelApplicationFilename}"; Flags: ignoreversion skipifsourcedoesntexist
-Source: "bin\{#ApplicationName}.cmd"; DestDir: "{code:GetDestDir}\bin"; DestName: "{code:GetBinDirApplicationCmdFilename}"; Flags: ignoreversion
-Source: "bin\{#ApplicationName}"; DestDir: "{code:GetDestDir}\bin"; DestName: "{code:GetBinDirApplicationFilename}"; Flags: ignoreversion
+Source: "bin\{#TunnelApplicationName}.exe"; DestDir: "{code:GetDestDir}\bin"; DestName: "{code:GetBinDirTunnelApplicationFilename}"; Flags: ignoreversion skipifsourcedoesntexist; Components: cli
+Source: "bin\{#ApplicationName}.cmd"; DestDir: "{code:GetDestDir}\bin"; DestName: "{code:GetBinDirApplicationCmdFilename}"; Flags: ignoreversion; Components: cli
+Source: "bin\{#ApplicationName}"; DestDir: "{code:GetDestDir}\bin"; DestName: "{code:GetBinDirApplicationFilename}"; Flags: ignoreversion; Components: cli
 Source: "{#ProductJsonPath}"; DestDir: "{code:GetDestDir}\{#VersionedResourcesFolder}\resources\app"; Flags: ignoreversion
 #ifdef AppxPackageName
 Source: "appx\{#AppxPackage}"; DestDir: "{code:GetDestDir}\{#VersionedResourcesFolder}\appx"; BeforeInstall: RemoveAppxPackage; Flags: ignoreversion; Check: ShouldUseWindows11ContextMenu
@@ -1993,7 +2013,7 @@ var
   ResultCode: Integer;
   Permissions: string;
 begin
-  Permissions := '/grant:r "*S-1-5-18:(OI)(CI)F" /grant:r "*S-1-5-32-544:(OI)(CI)F" /grant:r "*S-1-5-11:(OI)(CI)RX" /grant:r "*S-1-5-32-545:(OI)(CI)RX"';
+  Permissions := '/grant:r "*S-1-5-18:(OI)(CI)F" /grant:r "*S-1-5-32-544:(OI)(CI)F" /grant:r "*S-1-5-11:(OI)(CI)RX" /grant:r "*S-1-5-32-545:(OI)(CI)RX" /grant:r "*S-1-15-2-1:(OI)(CI)RX"';
 
   #if "user" == InstallTarget
     Permissions := Permissions + Format(' /grant:r "*S-1-3-0:(OI)(CI)F" /grant:r "%s:(OI)(CI)F"', [GetUserNameString()]);

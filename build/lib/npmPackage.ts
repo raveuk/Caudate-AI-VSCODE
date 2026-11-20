@@ -42,7 +42,16 @@ export function ensureNpmPackage(packageName: string, nodeModulesRoot = 'node_mo
 	const storeDir = path.join(nodeModulesRoot, '.pnpm', 'node_modules', ...packageName.split('/'));
 	if (fs.existsSync(path.join(storeDir, 'package.json')) && JSON.parse(fs.readFileSync(path.join(storeDir, 'package.json'), 'utf8')).version === lockPackage.version) {
 		fs.mkdirSync(path.dirname(packageDir), { recursive: true });
-		fs.symlinkSync(fs.realpathSync(storeDir), packageDir, 'junction');
+		const resolvedStoreDir = fs.realpathSync(storeDir);
+		try {
+			fs.symlinkSync(resolvedStoreDir, packageDir, 'junction');
+		} catch (err) {
+			if ((err as NodeJS.ErrnoException)?.code === 'EPERM') {
+				fs.cpSync(resolvedStoreDir, packageDir, { recursive: true });
+			} else {
+				throw err;
+			}
+		}
 		console.log(`[ensureNpmPackage] Linked ${packageName}@${lockPackage.version} from pnpm's virtual store in ${packageDir}`);
 		return;
 	}

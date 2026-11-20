@@ -1,5 +1,11 @@
 ﻿[Messages]
-FinishedLabel=Setup has finished installing [name] on your computer. The application may be launched by selecting the installed shortcuts.
+WelcomeLabel1=Welcome to the [name] Setup Wizard
+WelcomeLabel2=This will install [name/ver] (developed by Rave Manji) on your computer.%n%nCaudate IDE combines the autonomous multi-agent workflows of Antigravity IDE and the inline editing speed of Cursor — with full support for local models (Ollama, LM Studio) and any OpenAI-compatible API, with zero sign-in required.%n%nClick Next to review the license and see everything contained in this package.
+WizardInfoBefore=What's Included in Caudate IDE
+InfoBeforeLabel=Please review everything contained in this installation package before continuing.
+WizardInfoAfter=Quick Start & Keyboard Shortcuts
+InfoAfterLabel=Caudate IDE has been installed. Here is how to get started right away:
+FinishedLabel=Setup has finished installing [name] on your computer. The application may be launched by selecting the installed shortcuts or running 'caudate' from a terminal.
 ConfirmUninstall=Are you sure you want to completely remove %1 and all of its components?
 
 [CustomMessages]
@@ -9,12 +15,12 @@ CreateQuickLaunchIcon=Create a &Quick Launch icon
 AddContextMenuFiles=Add "Open with %1" action to Windows Explorer file context menu
 AddContextMenuFolders=Add "Open with %1" action to Windows Explorer directory context menu
 AssociateWithFiles=Register %1 as an editor for supported file types
-AddToPath=Add to PATH (requires shell restart)
+AddToPath=Add 'caudate' CLI to PATH (requires shell restart)
 RunAfter=Run %1 after installation
-Other=Other:
+Other=Windows Explorer & CLI integration:
 SourceFile=%1 Source File
 OpenWithCodeContextMenu=Open w&ith %1
-UpdatingVisualStudioCode=Updating Visual Studio Code...
+UpdatingVisualStudioCode=Updating Caudate IDE...
 CopilotCliPageCaption=GitHub Copilot CLI
 CopilotCliPageDescription=Use GitHub Copilot from any terminal with the copilot command.
 CopilotCliPrompt=GitHub Copilot CLI isn't installed on this computer. How would you like to set up the copilot command?

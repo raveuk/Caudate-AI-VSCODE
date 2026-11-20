@@ -1,0 +1,46 @@
+CAUDATE IDE v1.0.0 — WHAT IS CONTAINED IN THIS INSTALLATION PACKAGE
+Developed by Rave Manji (@raveuk) | MIT License
+Repository: https://github.com/raveuk/Caudate-AI-VSCODE
+
+========================================================================
+WHAT THIS INSTALLER CONTAINS
+========================================================================
+
+1. CAUDATE IDE DESKTOP APPLICATION (Core Editor & Runtime)
+   - Full standalone VS Code (Code - OSS v1.148) + Electron 43 desktop IDE
+   - Open VSX Extension Marketplace pre-configured
+   - Zero mandatory sign-in, zero telemetry, zero vendor lock-in
+
+2. CAUDATE AI v2.0.0 BUILT-IN ENGINE (Right Sidebar)
+   - Autonomous Agent, Ask, and Plan modes with tool calling & checkpoints
+   - Bring Your Own Model:
+       * Local LLMs: Ollama & LM Studio (auto-detected)
+       * Cloud / API: OpenAI, OpenRouter, DeepSeek, Groq, vLLM, or any
+         OpenAI-compatible endpoint
+   - Inline & Editor AI:
+       * Ctrl+K Per-Hunk Inline Edit with inline Accept/Reject controls
+       * Tab Autocomplete & Next Edit Suggestions (NES)
+       * Ctrl+. AI Quick Fix for compiler/linter diagnostics
+       * Terminal Ctrl+K natural-language shell command generator
+   - Autonomous Workflows & Verification:
+       * Interactive Plan Artifacts with Proceed / Execute button
+       * Multi-File Review Bar (Keep / Undo per file or all)
+       * Parallel Git Worktree Agents (isolated branches)
+       * Headless Browser Agent for live UI verification
+   - Context, Integrations & Guardrails:
+       * Semantic Vector Index & Workspace Symbol Index
+       * Extended @ Mentions (@file, @folder, @codebase, @git, @web, @docs)
+       * Vision Image Attachments (drag/drop or paste screenshots)
+       * Scoped .caudaterules, Skills, Slash Commands & Notepads
+       * Live Token Meter & Context Compaction
+       * Built-in MCP (Model Context Protocol) Client (.caudate/mcp.json)
+       * AI Git Suite (Commit Message, PR Review, Conflict Resolver)
+       * .caudateignore Secret Protection & Command Allowlist/Denylist
+
+3. COMMAND-LINE INTERFACE & WINDOWS INTEGRATION
+   - 'caudate' CLI command (open files or folders from any terminal)
+   - Start Menu & Desktop shortcuts
+   - Windows Explorer "Open with Caudate IDE" context menu & file types
+   - Full Add/Remove Programs uninstaller
+
+Click Next to choose your destination folder, components, and tasks.

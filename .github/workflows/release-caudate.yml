@@ -78,7 +78,7 @@ jobs:
           VSCODE_SKIP_NODE_VERSION_CHECK: '1'
         run: pnpm install --frozen-lockfile
 
-      - name: Build Windows x64 standalone package
+      - name: Build Windows x64 Setup .exe installer & portable .zip
         env:
           VSCODE_SKIP_NODE_VERSION_CHECK: '1'
           NODE_OPTIONS: '--max-old-space-size=8192'
@@ -91,7 +91,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: caudate-windows-x64
-          path: ../Caudate-IDE-win32-x64.zip
+          path: |
+            .build/win32-x64/user-setup/CaudateIDESetup-*.exe
+            ../Caudate-IDE-win32-x64.zip
 
   publish-release:
     needs: [build-linux-x64, build-windows-x64]
